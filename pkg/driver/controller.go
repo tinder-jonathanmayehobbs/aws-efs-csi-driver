@@ -44,6 +44,7 @@ const (
 	TempMountPathPrefix = "/var/lib/csi/pv"
 	DefaultTagKey       = "efs.csi.aws.com/cluster"
 	DefaultTagValue     = "true"
+	SharedAccessPoint   = "sharedAccessPoint"
 )
 
 var (
@@ -79,6 +80,7 @@ func (d *Driver) CreateVolume(ctx context.Context, req *csi.CreateVolumeRequest)
 		basePath         string
 		provisioningMode string
 		err              error
+		sharedAccessPoint bool
 	)
 
 	//Parse parameters
@@ -179,16 +181,41 @@ func (d *Driver) CreateVolume(ctx context.Context, req *csi.CreateVolumeRequest)
 		return nil, err
 	}
 
+	if value, ok := volumeParams[SharedAccessPoint]; ok {
+		sharedAccessPoint, err = strconv.ParseBool(value)
+	}
+
 	gidStr := strconv.Itoa(gid)
-	rootDirName := RootDirPrefix + "-" + gidStr + "-" + uuid.New().String()
+	var suffix string = "-" + gidStr + "-" + uuid.New().String()
+	if sharedAccessPoint {
+		suffix = ""
+	}
+	rootDirName := RootDirPrefix + suffix
 	rootDir := basePath + "/" + rootDirName
 
 	accessPointsOptions.Gid = int64(gid)
 	accessPointsOptions.Uid = int64(gid)
-	accessPointsOptions.DirectoryPath = rootDir
+	if sharedAccessPoint {
+		accessPointsOptions.DirectoryPath = "/"
+	} else {
+		accessPointsOptions.DirectoryPath = rootDir
+	}
+	
 
 	accessPointId, err := d.cloud.CreateAccessPoint(ctx, volName, accessPointsOptions)
 	if err != nil {
+		if sharedAccessPoint {
+			if err == cloud.ErrAlreadyExists {
+			// this is good
+				return &csi.CreateVolumeResponse{
+					Volume: &csi.Volume{
+						CapacityBytes: volSize,
+						VolumeId:      accessPointsOptions.FileSystemId + "::" + accessPointId.AccessPointId,
+						VolumeContext: map[string]string{},
+					},
+				}, nil
+			}
+		}
 		d.gidAllocator.releaseGid(accessPointsOptions.FileSystemId, gid)
 		if err == cloud.ErrAccessDenied {
 			return nil, status.Errorf(codes.Unauthenticated, "Access Denied. Please ensure you have the right AWS permissions: %v", err)

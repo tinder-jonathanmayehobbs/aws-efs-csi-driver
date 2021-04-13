@@ -20,6 +20,10 @@ spec:
         app.kubernetes.io/name: aws-efs-csi-driver
         app.kubernetes.io/instance: kustomize
     spec:
+      hostAliases:
+        - ip: '10.64.68.224'
+          hostnames:
+            - 'fs-f7e85a00.efs.us-east-1.amazonaws.com'
       nodeSelector:
         beta.kubernetes.io/os: linux
       affinity:
@@ -39,7 +43,7 @@ spec:
         - name: efs-plugin
           securityContext:
             privileged: true
-          image: "amazon/aws-efs-csi-driver:v1.2.0"
+          image: "405753365262.dkr.ecr.us-east-1.amazonaws.com/kubernetes-csi/aws-efs-csi-driver:v1.2.0-tinder2"
           args:
             - --endpoint=$(CSI_ENDPOINT)
             - --logtostderr
@@ -72,7 +76,7 @@ spec:
             periodSeconds: 2
             failureThreshold: 5
         - name: csi-driver-registrar
-          image: public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar:v2.0.1-eks-1-18-1
+          image: 405753365262.dkr.ecr.us-east-1.amazonaws.com/kubernetes-csi/node-driver-registrar:v2.0.1-eks-1-18-1
           args:
             - --csi-address=$(ADDRESS)
             - --kubelet-registration-path=$(DRIVER_REG_SOCK_PATH)
@@ -92,7 +96,7 @@ spec:
             - name: registration-dir
               mountPath: /registration
         - name: liveness-probe
-          image: public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.1.0-eks-1-18-1
+          image: 405753365262.dkr.ecr.us-east-1.amazonaws.com/kubernetes-csi/livenessprobe:v2.1.0-eks-1-18-1
           args:
             - --csi-address=/csi/csi.sock
             - --health-port=9809

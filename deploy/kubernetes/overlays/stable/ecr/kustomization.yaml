@@ -4,5 +4,5 @@ bases:
   - ../../../base
 images:
   - name: amazon/aws-efs-csi-driver
-    newName: 602401143452.dkr.ecr.us-west-2.amazonaws.com/eks/aws-efs-csi-driver
-    newTag: v1.2.0
+    newName: 405753365262.dkr.ecr.us-east-1.amazonaws.com/kubernetes-csi/aws-efs-csi-driver
+    newTag: v1.2.0-tinder2

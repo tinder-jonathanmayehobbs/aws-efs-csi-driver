@@ -3,11 +3,11 @@ kind: Kustomization
 bases:
   - ../../base
 images:
-  - name: amazon/aws-efs-csi-driver
-    newTag: v1.2.0
-  - name: public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner
+  - name: 405753365262.dkr.ecr.us-east-1.amazonaws.com/kubernetes-csi/aws-efs-csi-driver
+    newTag: v1.2.0-tinder3
+  - name: 405753365262.dkr.ecr.us-east-1.amazonaws.com/kubernetes-csi/external-provisioner
     newTag: v2.0.3-eks-1-18-1
-  - name: public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe
+  - name: 405753365262.dkr.ecr.us-east-1.amazonaws.com/kubernetes-csi/livenessprobe
     newTag: v2.1.0-eks-1-18-1
-  - name: public.ecr.aws/eks-distro/kubernetes-csi/node-driver-registrar
+  - name: 405753365262.dkr.ecr.us-east-1.amazonaws.com/kubernetes-csi/node-driver-registrar
     newTag: v2.0.1-eks-1-18-1
